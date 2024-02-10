@@ -7,15 +7,18 @@ class Task:
         self.name = name
         self.priority = priority
         self.deadline = deadline
+        self.completed = False  # Initialiser la tâche comme non terminée
 
     def __str__(self):
         return f"{self.name} (Priorité: {self.priority}, Deadline: {self.deadline})"
 
     def time_remaining(self):
         current_date = datetime.date.today()
-        deadline_date = datetime.datetime.strptime(self.deadline, "%Y-%m-%d").date()  # Convertir la chaîne en date
-        remaining_time = deadline_date - current_date
+        remaining_time = self.deadline - current_date
         return remaining_time
+
+    def mark_as_completed(self):
+        self.completed = True  # Marquer la tâche comme terminée
 
 # Fonction pour ajouter une tâche
 def add_task(tasks):
@@ -34,7 +37,7 @@ def add_task(tasks):
         priority = "None"
         print("Prioritée définie sur None")
     deadline = input("Date limite (format YYYY-MM-DD) : ")
-    deadline = datetime.datetime.strptime(deadline, "%Y-%m-%d").date()
+    deadline = datetime.datetime.strptime(deadline, "%Y-%m-%d").date()  # Convertir en datetime.date
     task = Task(name, priority, deadline)
     tasks.append(task)
     print("Tâche ajoutée avec succès.")
@@ -46,8 +49,13 @@ def display_tasks(tasks):
     else:
         print("Tâches en cours :")
         for index, task in enumerate(tasks, start=1):
-            remaining_time = task.time_remaining()
-            print(f"{index}. {task} - Temps restant: {remaining_time.days} jours")
+            if not task.completed:
+                remaining_time = task.time_remaining()
+                print(f"{index}. {task} - Temps restant: {remaining_time.days} jours")
+        print("\nTâches terminées :")
+        for index, task in enumerate(tasks, start=1):
+            if task.completed:
+                print(f"{index}. {task}")
 
 # Fonction pour sauvegarder les tâches dans un fichier JSON
 def save_tasks(tasks):
@@ -56,7 +64,8 @@ def save_tasks(tasks):
         task_data = {
             'name': task.name,
             'priority': task.priority,
-            'deadline': task.deadline.strftime("%Y-%m-%d")  # Convertir la date en chaîne de caractères
+            'deadline': task.deadline.strftime("%Y-%m-%d"),  # Convertir en chaîne de caractères
+            'completed': task.completed
         }
         tasks_data.append(task_data)
 
@@ -71,6 +80,17 @@ def print_recent_task(tasks):
         print(f"(!) {recent_task.name}: {remaining_time.days} jours")
     else:
         print("(!) Aucune tâche enregistrée.")
+        
+# Fonction pour marquer une tâche comme terminée
+def mark_task_completed(tasks):
+    display_tasks(tasks)
+    task_index = int(input("Entrez le numéro de la tâche terminée : ")) - 1
+    if 0 <= task_index < len(tasks):
+        tasks[task_index].mark_as_completed()  # Appeler la méthode pour marquer la tâche comme terminée
+        print("Tâche marquée comme terminée.")
+        save_tasks(tasks)
+    else:
+        print("Numéro de tâche invalide.")
 
 # Fonction principale
 def main():
@@ -78,7 +98,9 @@ def main():
     try:
         with open("tasks.json", "r") as file:
             tasks_data = json.load(file)
-            tasks = [Task(**task_data) for task_data in tasks_data]
+            tasks = [Task(task_data['name'], task_data['priority'], datetime.datetime.strptime(task_data['deadline'], "%Y-%m-%d").date()) for task_data in tasks_data]
+            for task, task_data in zip(tasks, tasks_data):
+                task.completed = task_data.get('completed', False)  # Assurez-vous de mettre à jour la propriété `completed`
     except FileNotFoundError:
         tasks = []
 
@@ -86,7 +108,8 @@ def main():
         print("\n----- Menu: -----")
         print("| 1. Ajouter une tâche")
         print("| 2. Afficher les tâches")
-        print("| 3. Quitter")
+        print("| 3. Marquer une tâche comme terminée")
+        print("| 4. Quitter")
         print("-------------------")
         print_recent_task(tasks)
         print("-------------------")
@@ -99,6 +122,8 @@ def main():
         elif choice == "2":
             display_tasks(tasks)
         elif choice == "3":
+            mark_task_completed(tasks)
+        elif choice == "4":
             print("Au revoir !")
             break
         else:
