@@ -11,6 +11,12 @@ class Task:
     def __str__(self):
         return f"{self.name} (Priorité: {self.priority}, Deadline: {self.deadline})"
 
+    def time_remaining(self):
+        current_date = datetime.date.today()
+        deadline_date = datetime.datetime.strptime(self.deadline, "%Y-%m-%d").date()  # Convertir la chaîne en date
+        remaining_time = deadline_date - current_date
+        return remaining_time
+
 # Fonction pour ajouter une tâche
 def add_task(tasks):
     name = input("Nom de la tâche : ")
@@ -40,7 +46,8 @@ def display_tasks(tasks):
     else:
         print("Tâches en cours :")
         for index, task in enumerate(tasks, start=1):
-            print(f"{index}. {task}")
+            remaining_time = task.time_remaining()
+            print(f"{index}. {task} - Temps restant: {remaining_time.days} jours")
 
 # Fonction pour sauvegarder les tâches dans un fichier JSON
 def save_tasks(tasks):
@@ -49,12 +56,21 @@ def save_tasks(tasks):
         task_data = {
             'name': task.name,
             'priority': task.priority,
-            'deadline': task.deadline  # Utiliser directement la date limite telle quelle
+            'deadline': task.deadline.strftime("%Y-%m-%d")  # Convertir la date en chaîne de caractères
         }
         tasks_data.append(task_data)
 
     with open("tasks.json", "w") as file:
-        json.dump(tasks_data, file, default=str)  # Utiliser default=str pour gérer la sérialisation de la date
+        json.dump(tasks_data, file)
+
+# Fonction pour afficher la tâche la plus récente avec le temps restant dans le menu
+def print_recent_task(tasks):
+    if tasks:
+        recent_task = max(tasks, key=lambda x: x.deadline)
+        remaining_time = recent_task.time_remaining()
+        print(f"(!) {recent_task.name}: {remaining_time.days} jours")
+    else:
+        print("(!) Aucune tâche enregistrée.")
 
 # Fonction principale
 def main():
@@ -67,10 +83,13 @@ def main():
         tasks = []
 
     while True:
-        print("\nMenu:")
-        print("1. Ajouter une tâche")
-        print("2. Afficher les tâches")
-        print("3. Quitter")
+        print("\n----- Menu: -----")
+        print("| 1. Ajouter une tâche")
+        print("| 2. Afficher les tâches")
+        print("| 3. Quitter")
+        print("-------------------")
+        print_recent_task(tasks)
+        print("-------------------")
 
         choice = input("Entrez votre choix : ")
 
@@ -87,3 +106,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
