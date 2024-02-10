@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire de tâches</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #007bff;
+        }
+
+        form .form-group {
+            margin-bottom: 20px;
+        }
+
+        form label {
+            font-weight: bold;
+        }
+
+        form input[type="text"], form input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+
+        form button[type="submit"] {
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        form button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .delete-btn {
+            color: #dc3545;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            color: #c82333;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gestionnaire de tâches</h1>
+        <form action="/add_task" method="POST">
+            <div class="form-group">
+                <label for="name">Nom de la tâche :</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="priority">Priorité de la tâche (1 / 2 / 3):</label>
+                <input type="text" class="form-control" id="priority" name="priority" required>
+            </div>
+            <div class="form-group">
+                <label for="deadline">Date limite :</label>
+                <input type="date" class="form-control" id="deadline" name="deadline" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Ajouter une tâche</button>
+        </form>
+        <h2>Tâches en cours :</h2>
+        <ul>
+            {% for task in tasks %}
+                {% if not task.completed %}
+                    <li>
+                        {{ task }} - Temps restant: {{ task.time_remaining().days }} jours
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+        <h2>Tâches terminées :</h2>
+        <ul>
+            {% for task in tasks %}
+                {% if task.completed %}
+                    <li class="completed">{{ task }}</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+
+</body>
+</html>
