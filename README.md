@@ -5,9 +5,13 @@
 # Fonctionnalités :
 
 📝 **_Ajouter une tâche :_** Les utilisateurs peuvent saisir le nom, la priorité et la date limite d'une tâche pour l'ajouter à leur liste de tâches.
+
 📋 **_Afficher les tâches :_** Affiche la liste des tâches enregistrées jusqu'à présent, avec leur nom, leur priorité et leur date limite.
+
 ✅ **_Marquer une tâche comme terminée :_** Permet aux utilisateurs de marquer une tâche comme terminée une fois qu'elle est accomplie.
+
 🗑️ **_Supprimer une tâche :_** Offre la possibilité de supprimer une tâche de la liste si nécessaire.
+
 ⏳ **_Afficher le temps restant pour une tâche :_** Calcul et affiche le temps restant avant la date limite pour chaque tâche.
 
 # Utilisation
