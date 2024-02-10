@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire de tâches</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 40px;
+        }
+        .card-header {
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+        }
+        .card-body {
+            background-color: #fff;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .list-group-item {
+            background-color: #fff;
+            border-color: rgba(0, 0, 0, 0.125);
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+        .list-group-item:last-child {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .modal-header {
+            background-color: #007bff;
+            color: #fff;
+            border-bottom: none;
+        }
+        .modal-content {
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="text-center">Gestionnaire de tâches</h1>
+            </div>
+            <div class="card-body">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <h2>Tâches en cours :</h2>
+                <div class="mb-3">
+                    <span class="mr-2">Trier par :</span>
+                    <a href="{{ url_for('index', filter='name') }}" class="btn btn-primary btn-sm mr-2">Nom</a>
+                    <a href="{{ url_for('index', filter='priority') }}" class="btn btn-primary btn-sm mr-2">Priorité</a>
+                    <a href="{{ url_for('index', filter='deadline') }}" class="btn btn-primary btn-sm mr-2">Date limite</a>
+                </div>
+                <button class="btn btn-primary mb-3" onclick="openAddTaskPopup()">Ajouter une tâche</button>
+                <ul class="list-group">
+                    {% for task in tasks %}
+                        {% if not task.completed %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ task.name }} - Priorité: {{ task.priority }} - Temps restant: {% if task.time_remaining() is not none and task.time_remaining().days > 0 %}{{ task.time_remaining().days }} jours{% else %}Terminée{% endif %}
+                                <form action="{{ url_for('mark_task_completed', task_index=loop.index0) }}" method="POST">
+                                    <button type="submit" class="btn btn-success btn-sm ml-2"><i class="fa fa-check"></i> Marquer comme terminée</button>
+                                </form>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fenêtre popup pour ajouter une tâche -->
+    <div id="addTaskPopup" class="modal" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajouter une tâche</h5>
+                    <button type="button" class="close" onclick="closeAddTaskPopup()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Formulaire pour ajouter une tâche -->
+                    <form action="{{ url_for('add_task') }}" method="POST">
+                        <div class="form-group">
+                            <label for="taskName">Nom de la tâche</label>
+                            <input type="text" class="form-control" id="taskName" name="taskName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskPriority">Priorité de la tâche</label>
+                            <select class="form-control" id="taskPriority" name="taskPriority" required>
+                                <option value="Elevée">Élevée</option>
+                                <option value="Moyenne">Moyenne</option>
+                                <option value="Faible">Faible</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskDeadline">Date limite</label>
+                            <input type="date" class="form-control" id="taskDeadline" name="taskDeadline" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Ajouter</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openAddTaskPopup() {
+            document.getElementById("addTaskPopup").style.display = "block";
+        }
+
+        function closeAddTaskPopup() {
+            document.getElementById("addTaskPopup").style.display = "none";
+        }
+    </script>
+</body>
+</html>
